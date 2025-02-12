@@ -19,16 +19,34 @@ interface Location {
 }
 
 interface Coordinates {
-    lat: number;
-    lon: number;
+    lat: number
+    lon: number
 }
 
-export const login = async (name: string, email: string) => {
-    
+export interface User {
+    name: string
+    email: string
+}
+
+export const login = async (name: string, email: string): Promise<Response> => {
+    const body = {
+        "name": name,
+        "email": email
+    }
+
+    return fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+    });
 }
 
 export const logout = async () => {
-
+    return fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+    }); 
 }
 
 export const getDogsByQuery = async (
@@ -40,6 +58,12 @@ export const getDogsByQuery = async (
     ageMin?: number, 
     ageMax?: number 
 ) => {
+}
+
+export const getBreeds = async () => {
+    return fetch(`${API_BASE_URL}/dogs/breeds`, {
+        credentials: "include",
+    });
 }
 
 
