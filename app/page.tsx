@@ -5,20 +5,39 @@ import { User, login, logout, getBreeds } from "./api";
 import { useState, useEffect } from "react";
 import LoginForm from "./components/LoginForm";
 import FilterPanel from "./components/FilterPanel";
-import {Form, Input, Button, Slider} from "@heroui/react";
+import {Button, Pagination} from "@heroui/react";
+
+import DogCard from "./components/DogCard";
+import { getDogsByQuery, getDogsByIds } from "./api";
 
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [breeds, setBreeds] = useState([]);
   const [filters, setFilters] = useState({
-    breeds: [],
+    breeds: new Set([]),
     zipCodes: [],
     minAge: 0,
     maxAge: 30,
     sort: "breed:asc",
     resultsPerPage: 10,
   });
+  const [dogs, setDogs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(10);
+  const [resultsPerPage, setResultsPerPage] = useState(25);
+
+  const updateSearchResults = async () => {
+    const result = await getDogsByQuery(resultsPerPage, filters.sort, (currentPage - 1) * resultsPerPage, [...filters.breeds]);
+    const responseBody = await result.json();
+    const dogs = await getDogsByIds(responseBody.resultIds);
+    setDogs(await dogs.json());
+  }
+
+  const updateCurrentPage = async (page: number) => {
+    setCurrentPage(page);
+    await updateSearchResults();
+  }
 
   const handleLogin = async (name: string, email: string) => {
     const apiLoginResponse = await login(name, email);
@@ -29,8 +48,10 @@ export default function Home() {
       // Get breeds
       const apiGetBreedsResponse = await getBreeds();
       if (apiGetBreedsResponse.status === 200) {
-        setBreeds(await apiGetBreedsResponse.json());
-        console.log(breeds);
+        setBreeds((await apiGetBreedsResponse.json()).map(x => ({
+          key: x,
+          label: x
+        })));
       }
     } else {
 
@@ -50,7 +71,16 @@ export default function Home() {
             <Button onPress={handleLogout}>
               Log out
             </Button>
-            <FilterPanel breeds={breeds} minAge={0} maxAge={30} />
+            <FilterPanel breeds={breeds} filters={filters} setFilters={setFilters} />
+            <Button onPress={updateSearchResults}>Search</Button>
+            {dogs.length > 0 && (
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {dogs.map((dog) => (
+                  <DogCard key={dog.id} dog={dog} />
+                ))}
+              </div>
+            )}
+            <Pagination showControls initialPage={1} total={totalPages} onChange={updateCurrentPage} />
           </div>
         }
       </main>
