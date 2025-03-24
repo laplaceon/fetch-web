@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {Button, Form, Input} from "@heroui/react";
 
-const LoginForm = ({ handleLogin }) => {
+export const LoginForm = ({ handleLogin }) => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
 
@@ -42,5 +42,3 @@ const LoginForm = ({ handleLogin }) => {
         </Form>
     );
 };
-
-export default LoginForm;

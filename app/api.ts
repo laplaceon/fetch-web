@@ -77,12 +77,22 @@ export const getDogsByIds = async (ids: string[]) => {
     })
 }
 
-export const getDogsByMatch = async () => {
-    
+export const getMatchFromDogs = async (ids: string[]) => {
+    return fetch(`${API_BASE_URL}/dogs/match`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ids),
+        credentials: "include",
+    })
 }
 
 export const getLocationsByZipcodes = async (zipCodes: string[]) => {
-
+    return fetch(`${API_BASE_URL}/locations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(zipCodes),
+        credentials: "include",
+    })
 }
 
 export const getLocationsByQuery = async (
@@ -103,7 +113,17 @@ export const getLocationsByQuery = async (
         top_left: Location
     }
 ) => {
-
+    return fetch(`${API_BASE_URL}/locations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            size: size,
+            from: from,
+            city: city,
+            states: states
+        }),
+        credentials: "include",
+    })
 }
 
 
