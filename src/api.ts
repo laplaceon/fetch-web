@@ -1,4 +1,14 @@
+import { User } from "@/types";
+
 const API_BASE_URL = "https://frontend-take-home-service.fetch.com";
+
+export const isLoggedIn = () => {
+    if (typeof window !== 'undefined') {
+        const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+        return user;
+    }
+
+}
 
 export const login = async (name: string, email: string): Promise<Response> => {
     const body = {
@@ -13,8 +23,7 @@ export const login = async (name: string, email: string): Promise<Response> => {
         body: JSON.stringify(body),
     });
 }
-
-export const logout = async () => {
+export const logout = async (): Promise<Response> => {
     return fetch(`${API_BASE_URL}/auth/logout`, {
         method: "POST",
         credentials: "include",
