@@ -1,15 +1,20 @@
 import DefaultLayout from "@/layouts/default";
 
-import { getDogsByQuery, getDogsByIds, isLoggedIn } from "@/api";
+import { getDogsByQuery, getDogsByIds, isLoggedIn, getMatchFromDogs } from "@/api";
 import { FilterPanel } from "@/components/FilterPanel";
 import { LoginForm } from "@/components/LoginForm";
 import { Button } from "@heroui/button";
 import { DogCard } from "@/components/DogCard";
 import { Pagination } from "@heroui/pagination";
+import { MatchDialog } from "@/components/MatchDialog";
+import { useDisclosure } from "@heroui/modal";
+
+import { StarIcon } from "lucide-react";
 
 import { useState, useEffect } from "react";
 
 export default function IndexPage() {
+  const resultsPerPage = 25;
   const [userLoggedIn, setUserLoggedIn] = useState(false);
   const [filters, setFilters] = useState({
     breeds: new Set([]),
@@ -21,8 +26,7 @@ export default function IndexPage() {
   const [dogs, setDogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [resultsPerPage, setResultsPerPage] = useState(25);
-  const [favorites, setFavorites] = useState(new Set([]));
+  const [favorites, setFavorites] = useState(new Map());
 
   useEffect(() => {
     const result = isLoggedIn();
@@ -43,20 +47,36 @@ export default function IndexPage() {
     }
   }
 
-  const toggleFavorite = (id: string) => {
-    const newFavorites = new Set(favorites);
-    if (favorites.has(id)) {
-      newFavorites.delete(id);
-    } else {
-      newFavorites.add(id);
-    }
+  const toggleFavorite = (id: string, dog) => {
+    setFavorites((prevFavorites) => {
+      const newFavorites = new Map(prevFavorites);
+      
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+      } else {
+        newFavorites.set(id, dog);
+      }
 
-    setFavorites(newFavorites);
+      return newFavorites;
+    });
   };
 
   const updateCurrentPage = async (page: number) => {
     setCurrentPage(page);
     await updateSearchResults(false);
+  }
+
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const [matchedDog, setMatchedDog] = useState(null);
+
+  const handleMatch = async () => {
+    const response = await getMatchFromDogs(Array.from(favorites.keys()));
+    if (response.status === 200) {
+      const match = await response.json();
+      const matchedFavorite = favorites.get(match.match);
+      setMatchedDog(matchedFavorite);
+      onOpen();
+    }
   }
 
   return (
@@ -96,6 +116,9 @@ export default function IndexPage() {
           </div>
         )}
       </section>
+      {(favorites.size > 0) && <Button radius="lg" size="lg" startContent={<StarIcon />} className="fixed bottom-10 right-10" onPress={handleMatch}>Get matched</Button>}
+      {(matchedDog !== null) && <MatchDialog dog={matchedDog} isOpen={isOpen} onOpenChange={onOpenChange} />}
+      
     </DefaultLayout>
   );
 }

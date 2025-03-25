@@ -18,7 +18,7 @@ export const DogCard = ({ dog, isFavorite, toggleFavorite }) => {
                     aria-label="Like" 
                     color="danger" 
                     className="absolute top-2 left-2 bg-white/70 rounded-full p-2 hover:bg-white"
-                    onPress={() => toggleFavorite(dog.id)}
+                    onPress={() => toggleFavorite(dog.id, dog)}
                 >
                     {isFavorite ? <StarOffIcon className="text-red-500" /> : <StarIcon className="text-gray-700" />}
                 </Button>
