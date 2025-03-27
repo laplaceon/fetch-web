@@ -3,7 +3,7 @@ const API_BASE_URL = "https://frontend-take-home-service.fetch.com";
 export const isLoggedIn = () => {
     if (typeof window !== 'undefined') {
         const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-        return user;
+        return Object.keys(user).length > 0;
     }
 }
 
@@ -105,7 +105,7 @@ export const getLocationsByCityAndState = async (
     cityQuery: string,
     states: string[]
 ) => {
-    return getLocationsByQuery(25, 0, cityQuery, states)
+    return getLocationsByQuery(200, 0, cityQuery, states)
 }
 
 const getLocationsByQuery = async (

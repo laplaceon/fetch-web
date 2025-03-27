@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { MoveUpIcon, MoveDownIcon } from "lucide-react";
+import { MoveUpIcon, MoveDownIcon, XIcon, PlusIcon } from "lucide-react";
 
 import { Select, SelectItem } from "@heroui/select";
 import { Slider } from "@heroui/slider";
@@ -156,18 +156,20 @@ export const FilterPanel = ({ onFiltersUpdate }: FilterPanelProps) => {
 
             <Dropdown>
               <DropdownTrigger>
-                <Button variant="bordered">{locationResults.size} results available</Button>
+                <Button color="primary" variant="solid" className="p-6">{locationResults.size} results available</Button>
               </DropdownTrigger>
-              <DropdownMenu aria-label="Dynamic Actions" items={Array.from(locationResults.values())}>
+              <DropdownMenu classNames={{list: "grid grid-cols-3 w-[400px] gap-3 text-center"}}
+                itemClasses={{
+                    base: "gap-4"
+                }} aria-label="Dynamic Actions" items={Array.from(locationResults.values())}>
                 {(location) => (
                   <DropdownItem
                     key={location.name}
-                    className="flex items-center justify-between p-2 border-b"
+                    className="gap-3 "
+                    onPress={() => toggleLocationSelection(location)}
+                    startContent={locations.has(location.name) ? <XIcon className="text-red-50" /> : <PlusIcon  className="text-green-50" />}
                   >
                     <span>{location.name}</span>
-                    <Button onPress={() => toggleLocationSelection(location)}>
-                      {locations.has(location.name) ? "Remove" : "Select"}
-                    </Button>
                   </DropdownItem>
                 )}
               </DropdownMenu>

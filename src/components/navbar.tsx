@@ -25,7 +25,6 @@ export const Navbar = () => {
       await logout();
       sessionStorage.removeItem("user");
       location.reload()
-
   }
 
   return (

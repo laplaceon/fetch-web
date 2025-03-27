@@ -38,8 +38,7 @@ export default function IndexPage() {
   const [matchedDog, setMatchedDog] = useState<Dog | null>(null);
 
   useEffect(() => {
-    const result = isLoggedIn();
-    if (result?.email) {
+    if (isLoggedIn()) {
       setUserLoggedIn(true);
     } else {
       setUserLoggedIn(false);
