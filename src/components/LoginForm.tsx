@@ -2,14 +2,24 @@ import { FormEvent, useState } from "react";
 import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
+import { Alert } from "@heroui/alert";
 
 import { User } from "@/types";
 
 import { login } from "@/api";
 
+import { z } from "zod";
+
+
+const loginSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().min(1, "Email is required").email("Invalid email format"),
+})
+
 export const LoginForm = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [errors, setErrors] = useState<Array<string>>([]);
 
     const handleLogin = async (name: string, email: string) => {
         const apiLoginResponse = await login(name, email);
@@ -24,15 +34,24 @@ export const LoginForm = () => {
 
     const handleLoginFormSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (name.trim() !== "" && email.trim() !== "") {
-            await handleLogin(name.trim(), email.trim())
-        } else {
 
+        const validationResult = loginSchema.safeParse({ name, email });
+
+        if (validationResult.success) {
+            await handleLogin(name, email)
+        } else {
+            const newErrors: Array<string> = [];
+            validationResult.error.errors.forEach((err) => {
+                newErrors.push(err.message);
+            });
+
+            setErrors(newErrors);
         }
     }
 
     return (
-        <Form className="w-full max-w-xs" validationBehavior="native" onSubmit={handleLoginFormSubmit}>
+        <Form className="mt-16 w-full max-w-xs" validationBehavior="native" onSubmit={handleLoginFormSubmit}>
+            {errors.length > 0 && <Alert color="danger" title={errors.join("\n")} />}
             <Input
                 isRequired
                 errorMessage="Please enter your name"
