@@ -1,6 +1,14 @@
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal"
 
-export const MatchDialog = ({dog, isOpen, onOpenChange}) => {
+import { Dog } from "@/types"
+
+interface MatchDialogProps {
+  dog: Dog,
+  isOpen: boolean,
+  onOpenChange: () => void
+}
+
+export const MatchDialog = ({dog, isOpen, onOpenChange}: MatchDialogProps) => {
     return (
         <Modal
           isDismissable={false}

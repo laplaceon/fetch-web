@@ -113,7 +113,7 @@ const getLocationsByQuery = async (
     from?: number,
     city?: string,
     states?: string[],
-    geoBoundingBox?: {
+    _?: {
         top: Location,
         left: Location,
         bottom: Location,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Form } from "@heroui/form";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
@@ -22,7 +22,7 @@ export const LoginForm = () => {
         }
     }
 
-    const handleLoginFormSubmit = async (e) => {
+    const handleLoginFormSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (name.trim() !== "" && email.trim() !== "") {
             await handleLogin(name.trim(), email.trim())

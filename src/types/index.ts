@@ -32,6 +32,10 @@ export interface User {
   email: string
 }
 
+export interface Match {
+  match: string
+}
+
 export interface LocationAggregate {
   name: string,
   zip_codes: string[]

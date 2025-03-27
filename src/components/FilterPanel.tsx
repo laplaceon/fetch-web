@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { MoveUpIcon, MoveDownIcon } from "lucide-react";
 
@@ -13,8 +13,17 @@ import { getBreeds, getLocationsByCityAndState } from "@/api";
 
 import { LocationAggregate } from "@/types";
 
+interface FilterPanelProps {
+  onFiltersUpdate: (filters: {
+    breeds: string[],
+    zipCodes: string[],
+    ageMin: number,
+    ageMax: number,
+    sort: string
+  }) => void;
+}
 
-export const FilterPanel = ({ onFiltersUpdate }) => {
+export const FilterPanel = ({ onFiltersUpdate }: FilterPanelProps) => {
     const sortCategories = [
       {key: "breed", label: "Breed"},
       {key: "name", label: "Name"},
@@ -23,7 +32,7 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
     
     const [breeds, setBreeds] = useState<string[]>([]);
 
-    const [selectedBreeds, setSelectedBreeds] = useState(new Set());
+    const [selectedBreeds, setSelectedBreeds] = useState<Set<string>>(new Set());
     const [ageRange, setAgeRange] = useState([0, 30])
 
     const [sortCategory, setSortCategory] = useState("breed");
@@ -43,10 +52,7 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
           (async () => {
             const apiGetBreedsResponse = await getBreeds();
             if (apiGetBreedsResponse.status === 200) {
-              setBreeds((await apiGetBreedsResponse.json()).map((breedName: string) => ({
-                key: breedName,
-                label: breedName
-              })));
+              setBreeds((await apiGetBreedsResponse.json()));
             }
           })()
         }
@@ -54,7 +60,7 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
 
     useEffect(() => {
       onFiltersUpdate({
-        breeds: selectedBreeds,
+        breeds: [...selectedBreeds],
         zipCodes: [...locations.values()].flatMap(location => location.zip_codes),
         ageMin: ageRange[0],
         ageMax: ageRange[1],
@@ -108,10 +114,10 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
             placeholder="Select breeds..."
             selectionMode="multiple"
             showScrollIndicators
-            onSelectionChange={async (selectedItems) => {setSelectedBreeds(new Set(selectedItems))}}
+            onSelectionChange={async (selectedItems) => {setSelectedBreeds(new Set([...selectedItems].map(String)))}}
           >
             {breeds.map((breed) => (
-              <SelectItem key={breed.key}>{breed.label}</SelectItem>
+              <SelectItem key={breed}>{breed}</SelectItem>
             ))}
           </Select>
         </div>
@@ -124,7 +130,7 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
             maxValue={30}
             minValue={0}
             step={1}
-            onChangeEnd={setAgeRange}
+            onChangeEnd={(value) => {setAgeRange(Array.isArray(value) ? value : [value, value])}}
           />
         </div>
 
@@ -141,7 +147,7 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
               placeholder="Select states..." 
               selectionMode="multiple" 
               showScrollIndicators
-              onSelectionChange={(selectedItems) => {setSelectedStates(new Set(selectedItems))}}
+              onSelectionChange={(selectedItems) => {setSelectedStates(new Set([...selectedItems].map(String)))}}
             >
                 {stateOptions.map((state) => (
                 <SelectItem key={state}>{state}</SelectItem>
@@ -192,7 +198,11 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
 
         <div className="flex items-center gap-4">
           <h3 className="text-lg font-semibold">Sort by:</h3>
-          <Select defaultSelectedKeys={[sortCategory]} onSelectionChange={(selectedItems) => {setSortCategory(selectedItems.currentKey)}}>
+          <Select defaultSelectedKeys={[sortCategory]} onSelectionChange={(selectedItems) => {
+            if (selectedItems.currentKey !== undefined) {
+              setSortCategory(selectedItems.currentKey)}
+            }
+          }>
             {sortCategories.map((sortCategory) => (
               <SelectItem key={sortCategory.key}>{sortCategory.label}</SelectItem>
             ))}

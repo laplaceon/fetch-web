@@ -12,13 +12,21 @@ import { useDisclosure } from "@heroui/modal";
 import { StarIcon } from "lucide-react";
 
 import { useState, useEffect } from "react";
-import { Dog } from "@/types";
+import { Dog, Match } from "@/types";
+
+interface Filters {
+  breeds: string[];
+  zipCodes: string[];
+  ageMin: number;
+  ageMax: number;
+  sort: string;
+}
 
 export default function IndexPage() {
   const resultsPerPage = 25;
   const [userLoggedIn, setUserLoggedIn] = useState(false);
-  const [filters, setFilters] = useState({
-    breeds: new Set([]),
+  const [filters, setFilters] = useState<Filters>({
+    breeds: [],
     zipCodes: [],
     ageMin: 0,
     ageMax: 30,
@@ -38,7 +46,7 @@ export default function IndexPage() {
     }
   }, [])
 
-  const updateSearchResults = async (breeds, zipCodes, ageMin, ageMax, sort) => {
+  const updateSearchResults = async (breeds: string[], zipCodes: string[], ageMin: number, ageMax: number, sort: string) => {
     const result = await getDogsByQuery(resultsPerPage, sort, 0, [...breeds], zipCodes, ageMin, ageMax);
     const responseBody = await result.json();
     const dogs = await getDogsByIds(responseBody.resultIds);
@@ -59,7 +67,7 @@ export default function IndexPage() {
     ageMin,
     ageMax,
     sort
-  }) => {
+  }: Filters) => {
     setFilters({
       breeds: breeds,
       zipCodes: zipCodes,
@@ -85,16 +93,16 @@ export default function IndexPage() {
     });
   };
 
-
-
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
   const handleMatch = async () => {
     const response = await getMatchFromDogs(Array.from(favorites.keys()));
     if (response.status === 200) {
-      const match = await response.json();
-      const matchedFavorite = favorites.get(match.match);
-      setMatchedDog(matchedFavorite);
+      const match: Match = await response.json();
+      if (favorites.has(match.match)) {
+        const matchedFavorite = favorites.get(match.match);
+        setMatchedDog(matchedFavorite!);
+      }
       onOpen();
     }
   }
