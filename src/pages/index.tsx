@@ -9,6 +9,8 @@ import { Pagination } from "@heroui/pagination";
 import { MatchDialog } from "@/components/MatchDialog";
 import { useDisclosure } from "@heroui/modal";
 
+import { Spinner } from "@heroui/spinner";
+
 import { StarIcon } from "lucide-react";
 
 import { useState, useEffect } from "react";
@@ -36,6 +38,7 @@ export default function IndexPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [favorites, setFavorites] = useState<Map<string, Dog>>(new Map());
   const [matchedDog, setMatchedDog] = useState<Dog | null>(null);
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn()) {
@@ -46,18 +49,22 @@ export default function IndexPage() {
   }, [])
 
   const updateSearchResults = async (breeds: string[], zipCodes: string[], ageMin: number, ageMax: number, sort: string) => {
+    setLoading(true);
     const result = await getDogsByQuery(resultsPerPage, sort, 0, [...breeds], zipCodes, ageMin, ageMax);
     const responseBody = await result.json();
     const dogs = await getDogsByIds(responseBody.resultIds);
     setDogs(await dogs.json());
     setTotalPages(Math.ceil(responseBody.total / resultsPerPage));
+    setLoading(false);
   }
 
   const updateCurrentPage = async (page: number) => {
+    setLoading(true);
     const result = await getDogsByQuery(resultsPerPage, filters.sort, (page - 1) * resultsPerPage, [...filters.breeds], filters.zipCodes, filters.ageMin, filters.ageMax);
     const responseBody = await result.json();
     const dogs = await getDogsByIds(responseBody.resultIds);
     setDogs(await dogs.json());
+    setLoading(false);
   }
 
   const updateFilters = async ({
@@ -140,7 +147,11 @@ export default function IndexPage() {
           </div>
         )}
       </section>
-      {(favorites.size > 0) && <Button radius="lg" size="lg" startContent={<StarIcon />} className="fixed bottom-10 right-10" onPress={handleMatch}>Get matched</Button>}
+      <div className="fixed bottom-5 right-10 flex flex-col items-center space-y-6">
+        {isLoading && <Spinner variant="simple" size="lg" />}
+        {(favorites.size > 0) && <Button radius="lg" size="lg" startContent={<StarIcon />} onPress={handleMatch}>Get matched</Button>}
+      </div>
+      
       {(matchedDog !== null) && <MatchDialog dog={matchedDog} isOpen={isOpen} onOpenChange={onOpenChange} />}
       
     </DefaultLayout>
