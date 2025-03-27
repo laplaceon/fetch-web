@@ -12,6 +12,7 @@ import { useDisclosure } from "@heroui/modal";
 import { StarIcon } from "lucide-react";
 
 import { useState, useEffect } from "react";
+import { Dog } from "@/types";
 
 export default function IndexPage() {
   const resultsPerPage = 25;
@@ -23,10 +24,11 @@ export default function IndexPage() {
     ageMax: 30,
     sort: "breed:asc",
   });
-  const [dogs, setDogs] = useState([]);
+  const [dogs, setDogs] = useState<Dog[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [favorites, setFavorites] = useState(new Map());
+  const [favorites, setFavorites] = useState<Map<string, Dog>>(new Map());
+  const [matchedDog, setMatchedDog] = useState<Dog | null>(null);
 
   useEffect(() => {
     const result = isLoggedIn();
@@ -47,14 +49,32 @@ export default function IndexPage() {
     }
   }
 
-  const toggleFavorite = (id: string, dog) => {
+  const updateFilters = ({
+    breeds,
+    zipCodes,
+    ageMin,
+    ageMax,
+    sort
+  }) => {
+    console.log("zip", zipCodes)
+    setFilters({
+      breeds: breeds,
+      zipCodes: zipCodes,
+      ageMin: ageMin,
+      ageMax: ageMax,
+      sort: sort
+    })
+    updateSearchResults();
+  }
+
+  const toggleFavorite = (dog: Dog) => {
     setFavorites((prevFavorites) => {
       const newFavorites = new Map(prevFavorites);
       
-      if (newFavorites.has(id)) {
-        newFavorites.delete(id);
+      if (newFavorites.has(dog.id)) {
+        newFavorites.delete(dog.id);
       } else {
-        newFavorites.set(id, dog);
+        newFavorites.set(dog.id, dog);
       }
 
       return newFavorites;
@@ -67,7 +87,6 @@ export default function IndexPage() {
   }
 
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
-  const [matchedDog, setMatchedDog] = useState(null);
 
   const handleMatch = async () => {
     const response = await getMatchFromDogs(Array.from(favorites.keys()));
@@ -87,10 +106,7 @@ export default function IndexPage() {
         ) : (
           <div className="w-full max-w-5xl">
             <div className="w-full p-6 shadow-md mb-6">
-              <FilterPanel filters={filters} setFilters={setFilters} />
-              <div className="flex justify-end mt-4">
-                <Button onPress={updateSearchResults}>Search</Button>
-              </div>
+              <FilterPanel onFiltersUpdate={updateFilters} />
             </div>
 
             {dogs.length > 0 ? (

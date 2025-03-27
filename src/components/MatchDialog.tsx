@@ -1,13 +1,12 @@
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal"
 
 export const MatchDialog = ({dog, isOpen, onOpenChange}) => {
-    console.log("dog", dog);
     return (
         <Modal
-        isDismissable={false}
-        isKeyboardDismissDisabled={true}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
+          isDismissable={false}
+          isKeyboardDismissDisabled={true}
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
       >
         <ModalContent>
             <ModalHeader className="flex flex-col gap-1">Match Found!</ModalHeader>

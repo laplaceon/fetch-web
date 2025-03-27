@@ -31,3 +31,8 @@ export interface User {
   name: string
   email: string
 }
+
+export interface LocationAggregate {
+  name: string,
+  zip_codes: string[]
+}

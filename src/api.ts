@@ -1,5 +1,3 @@
-import { User } from "@/types";
-
 const API_BASE_URL = "https://frontend-take-home-service.fetch.com";
 
 export const isLoggedIn = () => {
@@ -7,7 +5,6 @@ export const isLoggedIn = () => {
         const user = JSON.parse(sessionStorage.getItem("user") || "{}");
         return user;
     }
-
 }
 
 export const login = async (name: string, email: string): Promise<Response> => {
@@ -104,7 +101,14 @@ export const getLocationsByZipcodes = async (zipCodes: string[]) => {
     })
 }
 
-export const getLocationsByQuery = async (
+export const getLocationsByCityAndState = async (
+    cityQuery: string,
+    states: string[]
+) => {
+    return getLocationsByQuery(25, 0, cityQuery, states)
+}
+
+const getLocationsByQuery = async (
     size: number = 25,
     from?: number,
     city?: string,
@@ -122,7 +126,7 @@ export const getLocationsByQuery = async (
         top_left: Location
     }
 ) => {
-    return fetch(`${API_BASE_URL}/locations`, {
+    return fetch(`${API_BASE_URL}/locations/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

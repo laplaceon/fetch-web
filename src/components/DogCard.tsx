@@ -2,7 +2,9 @@ import { Button } from "@heroui/button";
 import { Card, CardHeader, CardBody } from "@heroui/card";
 import { StarIcon, StarOffIcon } from "lucide-react";
 
-export const DogCard = ({ dog, isFavorite, toggleFavorite }) => {
+import { Dog } from "@/types";
+
+export const DogCard = ({ dog, isFavorite, toggleFavorite }: { dog: Dog, isFavorite: boolean, toggleFavorite: (dog: Dog) => void }) => {
     return (
         <Card key={dog.id} className="w-full overflow-hidden shadow-lg relative">
 
@@ -18,7 +20,7 @@ export const DogCard = ({ dog, isFavorite, toggleFavorite }) => {
                     aria-label="Like" 
                     color="danger" 
                     className="absolute top-2 left-2 bg-white/70 rounded-full p-2 hover:bg-white"
-                    onPress={() => toggleFavorite(dog.id, dog)}
+                    onPress={() => toggleFavorite(dog)}
                 >
                     {isFavorite ? <StarOffIcon className="text-red-500" /> : <StarIcon className="text-gray-700" />}
                 </Button>
