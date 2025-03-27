@@ -108,7 +108,7 @@ export const FilterPanel = ({ onFiltersUpdate }) => {
             placeholder="Select breeds..."
             selectionMode="multiple"
             showScrollIndicators
-            onSelectionChange={(selectedItems) => {setSelectedBreeds(new Set(selectedItems))}}
+            onSelectionChange={async (selectedItems) => {setSelectedBreeds(new Set(selectedItems))}}
           >
             {breeds.map((breed) => (
               <SelectItem key={breed.key}>{breed.label}</SelectItem>

@@ -25,7 +25,6 @@ export default function IndexPage() {
     sort: "breed:asc",
   });
   const [dogs, setDogs] = useState<Dog[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [favorites, setFavorites] = useState<Map<string, Dog>>(new Map());
   const [matchedDog, setMatchedDog] = useState<Dog | null>(null);
@@ -39,24 +38,28 @@ export default function IndexPage() {
     }
   }, [])
 
-  const updateSearchResults = async (updateTotal: boolean = true) => {
-    const result = await getDogsByQuery(resultsPerPage, filters.sort, (currentPage - 1) * resultsPerPage, [...filters.breeds], filters.zipCodes, filters.ageMin, filters.ageMax);
+  const updateSearchResults = async (breeds, zipCodes, ageMin, ageMax, sort) => {
+    const result = await getDogsByQuery(resultsPerPage, sort, 0, [...breeds], zipCodes, ageMin, ageMax);
     const responseBody = await result.json();
     const dogs = await getDogsByIds(responseBody.resultIds);
     setDogs(await dogs.json());
-    if (updateTotal) {
-      setTotalPages(Math.ceil(responseBody.total / resultsPerPage));
-    }
+    setTotalPages(Math.ceil(responseBody.total / resultsPerPage));
   }
 
-  const updateFilters = ({
+  const updateCurrentPage = async (page: number) => {
+    const result = await getDogsByQuery(resultsPerPage, filters.sort, (page - 1) * resultsPerPage, [...filters.breeds], filters.zipCodes, filters.ageMin, filters.ageMax);
+    const responseBody = await result.json();
+    const dogs = await getDogsByIds(responseBody.resultIds);
+    setDogs(await dogs.json());
+  }
+
+  const updateFilters = async ({
     breeds,
     zipCodes,
     ageMin,
     ageMax,
     sort
   }) => {
-    console.log("zip", zipCodes)
     setFilters({
       breeds: breeds,
       zipCodes: zipCodes,
@@ -64,7 +67,8 @@ export default function IndexPage() {
       ageMax: ageMax,
       sort: sort
     })
-    updateSearchResults();
+    await updateSearchResults(breeds, zipCodes, ageMin, ageMax, sort);
+    
   }
 
   const toggleFavorite = (dog: Dog) => {
@@ -81,10 +85,7 @@ export default function IndexPage() {
     });
   };
 
-  const updateCurrentPage = async (page: number) => {
-    setCurrentPage(page);
-    await updateSearchResults(false);
-  }
+
 
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
